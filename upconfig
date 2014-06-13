@@ -1,0 +1,59 @@
+#!/bin/sh
+
+SERVER="219.153.62.81"
+USERNAME="root"
+PASSWD="root123"
+TOPDIR="Config"
+
+PROBEID=$(grep -r userid /etc/probe/setup.xml | sed 's/\s*<userid>//g' | sed 's/<\/userid>//g')
+configs=$(ls /etc/config)
+
+export ALLCONFIGS=0
+export target=""
+
+usage(){
+	cat <<EOF
+Usage: upconfig <configoptions>
+
+configoptions:
+	wireless:	wireless configuration
+	network:	network configuration
+	firewall:	firewall configuration
+	probe:		probe configuration
+	wifidog:	wifidog configuration
+	-a:  		all the configurations
+EOF
+	exit 1
+}
+
+upconf(){
+	if [ -f /etc/config/$1 ];then
+		curl -s -T /etc/config/$1 -u ${USERNAME}:${PASSWD} ftp://${SERVER}/${TOPDIR}/${PROBEID}/$1
+	else
+		echo "The file /etc/config/$1 doesn't exist"
+	fi
+}
+
+upallconf()
+{
+	for file in ${configs}
+	do
+		upconf ${file}
+	done
+}
+
+if [ $# -ne 1 ];then
+	usage
+fi
+
+case "$1" in
+	-a) export ALLCONFIGS=1; break;;
+	--help | -h) usage; break;;
+	*)	export target="$1"; break;;
+esac
+
+[ "$ALLCONFIGS" -eq 1 ] && upallconf
+if [ -n "$target" ];then
+	upconf ${target}
+fi
+
