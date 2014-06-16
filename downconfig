@@ -1,0 +1,76 @@
+#!/bin/sh
+
+SERVER="219.153.62.81"
+USERNAME="root"
+PASSWD="root123"
+TOPDIR="Config"
+
+PROBEID=$(grep -r userid /etc/probe/setup.xml | sed 's/\s*<userid>//g' | sed 's/<\/userid>//g')
+configs=$(ls /etc/config)
+
+export ALLCONFIGS=0
+export target=""
+export restartcmd=""
+
+usage(){
+	cat <<EOF
+Usage: downconfig <configoptions>
+
+configoptions:
+	wireless:	wireless configuration
+	network:	network configuration
+	system:		system configuration
+	firewall:	firewall configuration
+	qos-emong:	qos configuration
+	probe:		probe configuration
+	wifidog:	wifidog configuration
+	-a:  		all the configurations
+EOF
+	exit 1
+}
+
+downconf(){
+	if [ -f /etc/config/$1 ];then
+		curl -s -u ${USERNAME}:${PASSWD} ftp://${SERVER}/${TOPDIR}/${PROBEID}/$1 -o /etc/config/$1
+	else
+		echo "The file /etc/config/$1 doesn't exist"
+	fi
+}
+
+downallconf()
+{
+	for file in ${configs}
+	do
+		downconf ${file}
+	done
+}
+
+if [ $# -ne 1 ];then
+	usage
+fi
+
+case "$1" in
+	-a) export ALLCONFIGS=1; break;;
+	wireless) export target=$1; export restartcmd="/etc/init.d/network restart"; break;;
+	network) export target=$1; export restartcmd="/etc/init.d/network restart"; break;;
+	system) export target=$1; export restartcmd="/etc/init.d/system restart"; break;;
+	firewall) export target=$1; export restartcmd="/etc/init.d/firewall restart"; break;;
+	qos-emong) export target=$1; export restartcmd="/etc/init.d/qos-emong restart"; break;;
+	probe) export target=$1; export restartcmd="/etc/init.d/probeinit restart"; break;;
+	wifidog) export target=$1; export restartcmd="/etc/init.d/wifidog restart"; break;;
+	--help | -h) usage; break;;
+	*)	usage; break;
+esac
+
+if [ "$ALLCONFIGS" -eq 1 ] ;then
+	downallconf
+	reboot
+	exit 0
+fi
+
+if [ -n "$target" ];then
+    downconf ${target}
+	sleep 2
+	eval ${restartcmd}
+fi
+
