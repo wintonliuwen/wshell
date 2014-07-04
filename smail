@@ -1,0 +1,4 @@
+#!/bin/bash
+DEST="fniiopenwrt@groups.163.com"
+
+git send-email --to ${DEST} $* --compose
