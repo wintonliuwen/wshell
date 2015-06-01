@@ -1,0 +1,34 @@
+#!/bin/bash
+
+DNSSERVER=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')
+
+#1. Clear rules, add default rules
+iptables -F
+iptables -X
+iptables -Z
+iptables -P INPUT	DROP
+iptables -P OUTPUT	ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+
+#2. Add the inter network to access
+iptables -A INPUT -s 192.168.28.0/24 -j ACCEPT
+iptables -A INPUT -s 192.168.48.0/24 -j ACCEPT
+
+#3. Deny the network to access
+# ex: iptables -A INPUT -s <attackip> -j DROP
+
+
+#4. Allow some service to access
+iptables -A INPUT -p TCP --dport 80 --sport 1024:65534 -j ACCEPT
+iptables -A INPUT -p TCP --dport 3306 --sport 1024:65534 -j ACCEPT
+iptables -A INPUT -p TCP --dport 8080 --sport 1024:65534 -j ACCEPT
+iptables -A INPUT -p TCP --dport 8081 --sport 1024:65534 -j ACCEPT
+iptables -A INPUT -p TCP --dport 9099 --sport 1024:65534 -j ACCEPT
+iptables -A INPUT -p TCP --dport 19099 --sport 1024:65534 -j ACCEPT
+iptables -A INPUT -p TCP --dport 8088 --sport 1024:65534 -j ACCEPT
+iptables -A INPUT -p TCP --dport 9090 --sport 1024:65534 -j ACCEPT
+
+
+#5. Deny some service
+iptables -A OUTPUT ! -d $DNSSERVER -p udp --dport 53 -j DROP
