@@ -1,0 +1,22 @@
+#!/bin/bash
+
+
+switcheth0(){
+	sudo ifconfig usb0 down
+	sudo ifconfig eth0 up
+}
+
+switchusb0(){
+	sudo ifconfig eth0 down
+	sudo ifconfig usb0 up
+}
+
+if [ $1 = "usb" ];then
+	switchusb0
+elif [ $1 = "eth" ];then
+	switcheth0
+else
+	echo "Wrong Usage"
+fi
+
+

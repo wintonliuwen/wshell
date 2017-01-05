@@ -1,0 +1,14 @@
+#!/bin/bash
+
+gateway=`route -n | sed -n '3p' | awk '{print $2}'`
+
+findip()
+{
+        targetip=`nmap ${gateway}/24 -p 1888  | grep -B3 open | head -1 | awk '{print $5}'`
+	echo "$targetip"
+}
+
+
+target=`findip`
+echo "target $target"
+sshdirect zhaozhex ${target} intellab

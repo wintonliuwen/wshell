@@ -1,0 +1,43 @@
+#!/bin/bash
+
+
+flashonly()
+{
+
+if [ -d /work/packages ];then
+	rm -rf /work/packages
+fi
+	mkdir -p /work/packages
+
+cp out/target/product/sf3gr_crb_v1/sf3gr_crb_v1-flashfiles-eng.archermind.zip /work/packages/
+cd /work/packages/
+unzip sf3gr_crb_v1-flashfiles-eng.archermind.zip
+downloadtool -c1 --erase-mode 2 --library /work/project/austonio/FLASHTOOL_E2/libDownloadTool.so *.fls
+
+}
+
+compilekernel()
+{
+cd kernel/gmin-quilt-representation/
+./sofia-git-build.sh
+cd ../..
+rm device/intel/sofia3g-kernel/i386 -r
+cp kernel/gmin-quilt-representation/i386 device/intel/sofia3g-kernel/ -r
+make flashfiles -j6	
+}
+
+usage(){
+cat <<EOF
+Usage
+	comp_flash flash/compile
+EOF
+exit
+}
+
+if [ $1 = "compile" ];then
+	compilekernel
+elif [ $1 = "flash" ];then
+	flashonly
+else
+	usage
+fi

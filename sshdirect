@@ -1,0 +1,25 @@
+#!/bin/bash
+
+usage()
+{
+cat <<EOF
+Usage:	
+  sshdirect <username> <server> <password>
+EOF
+exit 0
+}
+
+
+directssh(){
+	username=$1
+	sshserver=$2
+	sshpasswd=$3
+	echo "SSH to ${sshserver} with ${username}"
+	sshpass -p "${sshpasswd}" ssh -p 22 ${username}@${sshserver}
+}
+
+if [ $# -ne 3 ];then
+	usage
+else
+	directssh $1 $2 $3
+fi

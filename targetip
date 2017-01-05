@@ -1,0 +1,31 @@
+#!/bin/bash
+
+gateway=`route -n | sed -n '3p' | awk '{print $2}'`
+targetport=""
+targetip=""
+
+usage(){
+cat <<EOF
+Usage:
+  targetip <portnum>
+EOF
+exit 0
+}
+
+if [ $# -ne 1 ];then
+	usage
+else
+	targetport=$1
+fi
+
+findip()
+{
+	targetip=`nmap ${gateway}/24 -p ${targetport}  | grep -B3 open | head -1 | awk '{print $5}'`
+}
+
+findip
+if [ -n "$targetip" ];then
+	echo "Found ${targetip} with service ${targetport}"
+else
+	echo "Not Found the server with service ${targetport}"
+fi

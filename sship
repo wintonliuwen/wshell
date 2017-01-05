@@ -1,0 +1,30 @@
+#!/bin/bash
+
+username="archermind"
+ipaddr=""
+ipprefix=`route -n | grep '0.0.0.0' | head -1 | awk '{print $2}' | sed 's/\.[0-9]*$//g'`
+
+usage(){
+cat <<EOF
+Usage:
+     sship <usrname> <lastip>
+EOF
+exit
+}
+
+
+if [ $# -eq 2 ];then
+	username=$1
+	ipaddr=$2
+elif [ $# -eq 1 ];then
+	if [ $1 == '--help' ];then
+		usage
+	else
+		ipaddr=$1
+	fi
+else
+	usage
+fi
+
+echo "Sshing ${username}@${ipprefix}.${ipaddr}"
+ssh ${username}@${ipprefix}.${ipaddr}

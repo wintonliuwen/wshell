@@ -1,0 +1,13 @@
+#!/bin/bash
+
+orignfile=$1
+today=`date "+%Y%m%d"`
+backfile="${orignfile}_${today}"
+
+if [ -f ${orignfile} ];then
+	echo "Backing file ${orignfile}....."
+	cp ${orignfile} ${backfile}
+else
+	echo "file $orignfile not found"
+fi
+
